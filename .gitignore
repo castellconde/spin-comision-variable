@@ -8,3 +8,5 @@ target/
 .claude/
 scripts/
 specs/
+.claude/
+.devcontainer/
