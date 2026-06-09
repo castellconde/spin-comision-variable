@@ -159,6 +159,22 @@ La tecnología de resiliencia (SmallRye FT) y de integración (Spin, JPA) queda
 confinada a los adaptadores; el núcleo se prueba con JUnit puro
 (`application/ComisionVariableServiceTest`).
 
+## Pruebas y cobertura (≥ 90%)
+
+Requisito del proyecto (spec JUN-002): toda clase con lógica tiene prueba y la
+cobertura debe ser **> 90%**. El gate está configurado con JaCoCo:
+
+```bash
+./mvnw verify          # corre tests + genera reporte + valida el gate 90%
+# Reporte HTML: target/site/jacoco/index.html
+```
+
+- Pruebas unitarias **puras** (sin contenedor) para dominio, application,
+  mappers, adaptadores (Spin, persistencia, fallback), cache y exception mappers.
+- Prueba de integración `@QuarkusTest` para el adaptador REST.
+- El gate (LINE + INSTRUCTION ≥ 0.90) excluye clases sin lógica: DTOs, entidades
+  JPA, interfaces de configuración y de REST client.
+
 ## Estructura del repositorio
 
 ```
