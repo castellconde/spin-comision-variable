@@ -5,3 +5,6 @@ target/
 .idea/
 *.iml
 .vscode/
+.claude/
+scripts/
+specs/
