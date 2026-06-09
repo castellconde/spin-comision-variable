@@ -7,6 +7,7 @@
 |---|---|---|---|
 | 0.1 | 08/06/2026 | Roberto Castillo | Runbook inicial del piloto Comisión Variable. |
 | 0.2 | 08/06/2026 | Roberto Castillo | Agregada sección 4.5: arranque paso a paso en OpenShift Developer Sandbox. |
+| 0.3 | 08/06/2026 | Roberto Castillo | Sección 4.5: agregado paso de clonación del repo en terminal (Web Terminal / local) y nota de estructura aplanada. |
 
 ## 1. Identificación del Producto
 
@@ -130,7 +131,24 @@ oc whoami
 oc project -q
 ```
 
-**Paso 5 — Desplegar el servicio (un comando).** Desde la raíz del repo:
+**Paso 5 — Clonar el repositorio en la terminal.** El script necesita los archivos del repo localmente (manifiestos, realm, mappings) para aplicarlos.
+
+> En la **Web Terminal** de OpenShift (ícono `>_` arriba en la consola → *Start*) ya tienes `oc` autenticado a tu namespace y `git` disponibles, así que puedes **omitir los Pasos 3 y 4**. En una terminal local, primero completa el login (Pasos 3-4) y ten `git` instalado.
+
+```bash
+git clone https://github.com/castellconde/spin-comision-variable.git
+cd spin-comision-variable
+```
+
+Si ya lo habías clonado antes, sólo actualízalo:
+
+```bash
+cd spin-comision-variable && git pull
+```
+
+El repositorio está **aplanado**: la raíz contiene `Dockerfile`, `pom.xml`, `src/`, `deploy/`, `mock-spin/`, etc. (no hay subcarpeta `comision-variable/`). Tras el `cd` ya estás en la raíz correcta.
+
+**Paso 6 — Desplegar el servicio (un comando).** Desde la raíz del repo (donde quedaste tras el `cd`):
 
 ```bash
 bash deploy/sandbox/deploy-sandbox.sh
@@ -138,7 +156,7 @@ bash deploy/sandbox/deploy-sandbox.sh
 
 El script lanza el build desde GitHub (`oc new-build`, tarda varios minutos la primera vez), crea los ConfigMaps del realm Keycloak y del mock Spin, aplica config/secret, despliega PostgreSQL + Keycloak + mock Spin y, por último, el microservicio con su Route. Imprime la URL pública al terminar. Si el repo es distinto al default, pasar `GIT_URL=https://github.com/ORG/REPO.git` antes del comando.
 
-**Paso 6 — Verificar que arrancó.**
+**Paso 7 — Verificar que arrancó.**
 
 ```bash
 oc get pods
@@ -147,7 +165,7 @@ ROUTE=$(oc get route comision-variable -o jsonpath='{.spec.host}')
 curl -s https://$ROUTE/q/health/ready
 ```
 
-**Paso 7 — Probar el endpoint.**
+**Paso 8 — Probar el endpoint.**
 
 ```bash
 TOKEN=$(bash deploy/sandbox/get-token.sh)
