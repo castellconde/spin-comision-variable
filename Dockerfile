@@ -14,9 +14,10 @@ WORKDIR /build
 # Cache de dependencias
 COPY pom.xml .
 RUN mvn -B -q -DskipTests dependency:go-offline || true
-# Código y empaquetado (fast-jar, sin tests para acelerar el build en cluster)
+# Código y empaquetado (fast-jar). Se omite compilar/ejecutar tests en la imagen
+# (la cobertura corre aparte en CI con ./mvnw verify); acelera el build en cluster.
 COPY src ./src
-RUN mvn -B -DskipTests clean package
+RUN mvn -B -Dmaven.test.skip=true clean package
 
 # ---- Etapa 2: runtime ----
 FROM registry.access.redhat.com/ubi10/ubi-minimal:latest

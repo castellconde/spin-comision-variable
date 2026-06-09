@@ -6,7 +6,6 @@ import org.eclipse.microprofile.openapi.annotations.enums.SecuritySchemeType;
 import org.eclipse.microprofile.openapi.annotations.info.Contact;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
-import org.eclipse.microprofile.openapi.annotations.security.SecuritySchemeIn;
 
 /** Definicion global de OpenAPI + esquema de seguridad Keycloak (Bearer JWT). */
 @OpenAPIDefinition(
@@ -21,7 +20,6 @@ import org.eclipse.microprofile.openapi.annotations.security.SecuritySchemeIn;
         type = SecuritySchemeType.HTTP,
         scheme = "bearer",
         bearerFormat = "JWT",
-        in = SecuritySchemeIn.HEADER,
         description = "Token JWT emitido por Keycloak (realm 'applications')")
 public class OpenApiConfig extends Application {
 }

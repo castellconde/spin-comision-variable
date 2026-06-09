@@ -43,7 +43,7 @@ public class ExceptionMappers {
         String traceId = TraceContext.currentTraceId();
         LOG.warnf("Error de negocio [trace=%s] %s: %s", traceId, ex.getCodigo(), ex.getMessage());
         ErrorResponse body = ErrorResponse.of(ex.getCodigo(), ex.getMessage(), ex.getStatus(), traceId);
-        return RestResponse.ResponseBuilder.create(ex.getStatus(), body).build();
+        return RestResponse.ResponseBuilder.<ErrorResponse>create(ex.getStatus()).entity(body).build();
     }
 
     /** Falla del proveedor de comisiones (puerto de salida). */
@@ -55,7 +55,7 @@ public class ExceptionMappers {
                 ex.getCodigo(),
                 "El proveedor de comisiones no esta disponible. Intente mas tarde.",
                 ex.getStatus(), traceId);
-        return RestResponse.ResponseBuilder.create(ex.getStatus(), body).build();
+        return RestResponse.ResponseBuilder.<ErrorResponse>create(ex.getStatus()).entity(body).build();
     }
 
     /** Catch-all -> 500 sin filtrar detalles internos. */
