@@ -37,7 +37,7 @@ Hay **dos formas equivalentes** de levantar el entorno. Elige una.
 
 Requisitos: VS Code + extensión *Dev Containers* (o cualquier IDE compatible) y Docker/Podman.
 
-1. Abre la carpeta `comision-variable` y ejecuta **"Reopen in Container"**.
+1. Abre la carpeta del repositorio (raíz del proyecto) y ejecuta **"Reopen in Container"**.
 2. El dev-container (`.devcontainer/docker-compose.yml`) levanta automáticamente
    el workspace **junto con** Postgres + Keycloak + Redis + mock Spin. No necesitas
    correr `docker compose` por separado.
@@ -53,13 +53,13 @@ Los servicios se resuelven por nombre (`postgres`, `keycloak`, `spin-mock`, `red
 
 Requisitos: Docker / Podman, JDK 21, Maven (o el wrapper `./mvnw`).
 
+Desde la raíz del repositorio:
+
 ```bash
 # 1) Levantar dependencias (Postgres + Keycloak + Redis + mock Spin)
-cd "SPIN Comision Variable"
 docker compose up -d
 
 # 2) Correr el microservicio en modo dev (perfil demo)
-cd comision-variable
 ./mvnw quarkus:dev -Dquarkus.profile=demo
 ```
 
@@ -76,16 +76,16 @@ Importar `postman/SPIN-Comision-Variable.postman_collection.json` y el environme
 
 ### Levantar TODO en contenedores (incluye el microservicio)
 ```bash
-cd comision-variable && ./mvnw package          # genera fast-jar
-cd .. && docker compose --profile full up -d --build
+docker compose --profile full up -d --build     # compila la app dentro del contenedor (Dockerfile multi-stage)
 ```
 
 ---
 
 ## Build nativo (empaquetado elegido)
 
+Desde la raíz del repositorio:
+
 ```bash
-cd comision-variable
 ./mvnw package -Dnative                          # usa builder Mandrel en contenedor
 docker build -f src/main/docker/Dockerfile.native -t comision-variable:native .
 ```

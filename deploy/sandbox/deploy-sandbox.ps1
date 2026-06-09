@@ -28,7 +28,7 @@ Write-Host "    Namespace actual: $Ns"
 Write-Host "==> 1/5 Build en el cluster desde GitHub..." -ForegroundColor Cyan
 oc get bc/$App 2>$null | Out-Null
 if ($LASTEXITCODE -ne 0) {
-    oc new-build --strategy=docker --name=$App --context-dir=comision-variable $GitUrl
+    oc new-build --strategy=docker --name=$App $GitUrl
 } else {
     Write-Host "    BuildConfig ya existe; iniciando nuevo build."
     oc start-build $App

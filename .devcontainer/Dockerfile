@@ -17,4 +17,4 @@ ARG USERNAME=vscode
 ARG USER_UID=1001
 RUN useradd --uid ${USER_UID} -m ${USERNAME} 2>/dev/null || true
 USER ${USERNAME}
-WORKDIR /workspaces/spin-comision-variable/comision-variable
+WORKDIR /workspaces/spin-comision-variable

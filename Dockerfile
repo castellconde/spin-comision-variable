@@ -3,9 +3,8 @@
 #  strategy). Compila con Maven/JDK21 y ejecuta el fast-jar sobre
 #  UBI10-minimal + Java 21. No requiere artefactos previos en git.
 #
-#  Build en OpenShift:
+#  Build en OpenShift (el Dockerfile está en la raíz del repo):
 #    oc new-build --strategy=docker --name=comision-variable \
-#       --context-dir=comision-variable \
 #       https://github.com/castellconde/spin-comision-variable.git
 # =====================================================================
 

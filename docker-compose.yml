@@ -1,0 +1,94 @@
+# =====================================================================
+#  Stack local del piloto SPIN - Comision Variable.
+#  Rutas relativas a la raíz del repo (este compose vive en la raíz).
+#  Levanta: PostgreSQL + Keycloak (realm applications) + Redis + mock Spin.
+#
+#  Uso:
+#    docker compose up -d                 # solo dependencias
+#    docker compose --profile full up -d  # + microservicio (build JVM)
+# =====================================================================
+name: spin-comision-variable
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: comvar-postgres
+    environment:
+      POSTGRES_DB: comvar
+      POSTGRES_USER: comvar
+      POSTGRES_PASSWORD: comvar
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U comvar -d comvar"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: comvar-keycloak
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: 8081
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./deploy/keycloak/realm-applications.json:/opt/keycloak/data/import/realm-applications.json:ro
+
+  redis:
+    image: redis:7-alpine
+    container_name: comvar-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+
+  spin-mock:
+    image: wiremock/wiremock:3.9.1
+    container_name: comvar-spin-mock
+    command: ["--global-response-templating", "--verbose"]
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./mock-spin/mappings:/home/wiremock/mappings:ro
+      - ./mock-spin/__files:/home/wiremock/__files:ro
+
+  # ---- Microservicio (opcional) ----
+  comision-variable:
+    profiles: ["full"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: comvar-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    environment:
+      QUARKUS_PROFILE: demo
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: comvar
+      DB_USERNAME: comvar
+      DB_PASSWORD: comvar
+      KEYCLOAK_URL: http://keycloak:8081
+      KEYCLOAK_REALM: applications
+      KEYCLOAK_CLIENT_ID: comision-variable-api
+      KEYCLOAK_CLIENT_SECRET: comision-variable-secret
+      SPIN_API_URL: http://spin-mock:8080
+      SPIN_AUTH_URL: http://spin-mock:8080
+      SPIN_CLIENT_ID: demo-client
+      SPIN_CLIENT_SECRET: demo-secret
+      SPIN_API_KEY: demo-api-key
+      REDIS_ENABLED: "true"
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:

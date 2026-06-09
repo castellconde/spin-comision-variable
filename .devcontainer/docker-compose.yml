@@ -3,7 +3,7 @@
 #  Al abrir la carpeta en el dev-container, este compose levanta el
 #  workspace de desarrollo + todas las dependencias del piloto:
 #  PostgreSQL + Keycloak (realm applications) + Redis + mock Spin.
-#  Las rutas son relativas a .devcontainer (la raiz del proyecto es ../..).
+#  Las rutas son relativas a .devcontainer (la raiz del repo es ..).
 # =====================================================================
 name: comvar-devcontainer
 
@@ -15,7 +15,7 @@ services:
       dockerfile: Dockerfile
     command: sleep infinity
     volumes:
-      - ../..:/workspaces/spin-comision-variable:cached
+      - ..:/workspaces/spin-comision-variable:cached
     environment:
       QUARKUS_PROFILE: demo
       DB_HOST: postgres
@@ -66,7 +66,7 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HTTP_PORT: 8081
     volumes:
-      - ../../deploy/keycloak/realm-applications.json:/opt/keycloak/data/import/realm-applications.json:ro
+      - ../deploy/keycloak/realm-applications.json:/opt/keycloak/data/import/realm-applications.json:ro
 
   redis:
     image: redis:7-alpine
@@ -76,8 +76,8 @@ services:
     image: wiremock/wiremock:3.9.1
     command: ["--global-response-templating", "--verbose"]
     volumes:
-      - ../../mock-spin/mappings:/home/wiremock/mappings:ro
-      - ../../mock-spin/__files:/home/wiremock/__files:ro
+      - ../mock-spin/mappings:/home/wiremock/mappings:ro
+      - ../mock-spin/__files:/home/wiremock/__files:ro
 
 volumes:
   pgdata:

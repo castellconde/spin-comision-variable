@@ -26,9 +26,7 @@ echo "    Proyecto/namespace actual: $NS"
 
 echo "==> 1/5 Build en el cluster desde GitHub (si no existe)..."
 if ! oc get bc/$APP >/dev/null 2>&1; then
-  oc new-build --strategy=docker --name=$APP \
-    --context-dir=comision-variable \
-    "$GIT_URL"
+  oc new-build --strategy=docker --name=$APP "$GIT_URL"
 else
   echo "    BuildConfig ya existe; iniciando nuevo build."
   oc start-build $APP

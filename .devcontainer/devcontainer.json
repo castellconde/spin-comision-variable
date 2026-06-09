@@ -3,7 +3,7 @@
   "//": "Dev-container como alternativa a 'docker compose': al abrirlo se levanta el workspace + Postgres + Keycloak + Redis + mock Spin.",
   "dockerComposeFile": "docker-compose.yml",
   "service": "workspace",
-  "workspaceFolder": "/workspaces/spin-comision-variable/comision-variable",
+  "workspaceFolder": "/workspaces/spin-comision-variable",
   "shutdownAction": "stopCompose",
   "customizations": {
     "vscode": {
