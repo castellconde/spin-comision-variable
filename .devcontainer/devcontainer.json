@@ -1,0 +1,54 @@
+{
+  "name": "spin-comision-variable",
+  "//": "Dev-container como alternativa a 'docker compose': al abrirlo se levanta el workspace + Postgres + Keycloak + Redis + mock Spin.",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "workspace",
+  "workspaceFolder": "/workspaces/spin-comision-variable/comision-variable",
+  "shutdownAction": "stopCompose",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "redhat.java",
+        "redhat.vscode-quarkus",
+        "vscjava.vscode-java-debug",
+        "vscjava.vscode-maven",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "java.configuration.runtimes": [
+          {
+            "name": "JavaSE-21",
+            "path": "/usr/lib/jvm/java-21",
+            "default": true
+          }
+        ]
+      }
+    }
+  },
+  "forwardPorts": [
+    8080,
+    "postgres:5432",
+    "keycloak:8081",
+    "spin-mock:8080",
+    "redis:6379"
+  ],
+  "portsAttributes": {
+    "8080": {
+      "label": "comision-variable (Quarkus)"
+    },
+    "postgres:5432": {
+      "label": "PostgreSQL"
+    },
+    "keycloak:8081": {
+      "label": "Keycloak"
+    },
+    "spin-mock:8080": {
+      "label": "Mock Spin (WireMock)"
+    },
+    "redis:6379": {
+      "label": "Redis"
+    }
+  },
+  "postCreateCommand": "java -version && ./mvnw -v || true",
+  "remoteUser": "vscode"
+}

@@ -1,0 +1,19 @@
+# =====================================================================
+#  Imagen NATIVA (Mandrel) - empaquetado elegido para el piloto.
+#  Construir el binario antes:
+#     ./mvnw package -Dnative
+#  Luego:
+#     docker build -f src/main/docker/Dockerfile.native -t comision-variable:native .
+# =====================================================================
+FROM registry.access.redhat.com/ubi10/ubi-minimal:latest
+
+WORKDIR /work/
+RUN chown 1001 /work && chmod g+rwX /work && chown 1001:root /work
+
+# Binario nativo generado por Mandrel
+COPY --chown=1001:root target/*-runner /work/application
+
+EXPOSE 8080
+USER 1001
+
+ENTRYPOINT ["./application", "-Dquarkus.http.host=0.0.0.0"]
