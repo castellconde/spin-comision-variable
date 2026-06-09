@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/comisiones",
+    "headers": {
+      "Authorization": { "matches": "Bearer .*" },
+      "x-api-key": { "matches": ".+" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "referencia": "{{jsonPath request.body '$.referencia'}}",
+      "concepto": "{{#if (jsonPath request.body '$.servicio')}}{{jsonPath request.body '$.servicio'}}{{else}}{{jsonPath request.body '$.producto'}}{{/if}}",
+      "porcentajeComision": 2.50,
+      "montoComision": 12.75,
+      "moneda": "MXN",
+      "estatus": "CALCULADA"
+    },
+    "fixedDelayMilliseconds": 80
+  }
+}

@@ -1,0 +1,18 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: comision-variable
+  labels:
+    app: comision-variable
+  annotations:
+    haproxy.router.openshift.io/timeout: "10s"
+spec:
+  to:
+    kind: Service
+    name: comision-variable
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

@@ -1,0 +1,58 @@
+# Mock del API Spin (WireMock). Las mappings se montan desde el ConfigMap
+# 'spin-mock-mappings' (creado por el script desde mock-spin/mappings).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spin-mock
+  labels:
+    app: spin-mock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spin-mock
+  template:
+    metadata:
+      labels:
+        app: spin-mock
+    spec:
+      containers:
+        - name: spin-mock
+          image: wiremock/wiremock:3.9.1
+          args: ["--global-response-templating", "--disable-banner"]
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /__admin/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: mappings
+              mountPath: /home/wiremock/mappings
+              readOnly: true
+      volumes:
+        - name: mappings
+          configMap:
+            name: spin-mock-mappings
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spin-mock
+  labels:
+    app: spin-mock
+spec:
+  selector:
+    app: spin-mock
+  ports:
+    - port: 8080
+      targetPort: 8080

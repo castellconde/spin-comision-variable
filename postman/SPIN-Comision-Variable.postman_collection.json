@@ -1,0 +1,181 @@
+{
+  "info": {
+    "name": "SPIN - Comision Variable",
+    "_postman_id": "b1f2c3d4-0001-4a5b-9c0d-comisionvariable",
+    "description": "Coleccion funcional del piloto Comision Variable. Flujo: 1) obtener token de Keycloak, 2) consultar comision, 3) health checks, 4) provocar error para probar resiliencia.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Obtener token (Keycloak - pos-client)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', function () { pm.response.to.have.status(200); });",
+              "var json = pm.response.json();",
+              "pm.collectionVariables.set('access_token', json.access_token);",
+              "pm.test('access_token presente', function () { pm.expect(json.access_token).to.be.a('string'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "grant_type", "value": "client_credentials" },
+            { "key": "client_id", "value": "{{kc_client_id}}" },
+            { "key": "client_secret", "value": "{{kc_client_secret}}" }
+          ]
+        },
+        "url": {
+          "raw": "{{keycloak_url}}/realms/{{realm}}/protocol/openid-connect/token",
+          "host": ["{{keycloak_url}}"],
+          "path": ["realms", "{{realm}}", "protocol", "openid-connect", "token"]
+        }
+      }
+    },
+    {
+      "name": "2. Consultar comision (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', function () { pm.response.to.have.status(200); });",
+              "var json = pm.response.json();",
+              "pm.test('tiene montoComision', function () { pm.expect(json.montoComision).to.not.be.undefined; });",
+              "pm.test('Location header presente', function () { pm.expect(pm.response.headers.has('Location')).to.be.true; });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{access_token}}" },
+          { "key": "X-Correlation-Id", "value": "{{$guid}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"POS-20260608-000123\",\n  \"plaza\": \"PLZ-001\",\n  \"tienda\": \"TND-04521\",\n  \"caja\": \"CAJA-03\",\n  \"transaccion\": \"TRX-998877\",\n  \"servicio\": \"SERV-TAE-ATT\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/rest/v1/comision-variable/comision",
+          "host": ["{{base_url}}"],
+          "path": ["rest", "v1", "comision-variable", "comision"]
+        }
+      }
+    },
+    {
+      "name": "3. Consultar comision - request invalido (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('400 Bad Request', function () { pm.response.to.have.status(400); });",
+              "var json = pm.response.json();",
+              "pm.test('codigo VALIDATION_ERROR', function () { pm.expect(json.codigo).to.eql('VALIDATION_ERROR'); });",
+              "pm.test('incluye traceId', function () { pm.expect(json.traceId).to.be.a('string'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{access_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"x\",\n  \"plaza\": \"\",\n  \"tienda\": \"TND-04521\",\n  \"caja\": \"CAJA-03\",\n  \"transaccion\": \"TRX-998877\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/rest/v1/comision-variable/comision",
+          "host": ["{{base_url}}"],
+          "path": ["rest", "v1", "comision-variable", "comision"]
+        }
+      }
+    },
+    {
+      "name": "4. Provocar error Spin (reintentos / circuit breaker)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('502/503', function () { pm.expect([502,503]).to.include(pm.response.code); });",
+              "var json = pm.response.json();",
+              "pm.test('codigo SPIN_UNAVAILABLE', function () { pm.expect(json.codigo).to.eql('SPIN_UNAVAILABLE'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{access_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"POS-FORCE-ERR\",\n  \"plaza\": \"PLZ-001\",\n  \"tienda\": \"TND-04521\",\n  \"caja\": \"CAJA-03\",\n  \"transaccion\": \"FORCE-ERROR\",\n  \"servicio\": \"SERV-TAE-ATT\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/rest/v1/comision-variable/comision",
+          "host": ["{{base_url}}"],
+          "path": ["rest", "v1", "comision-variable", "comision"]
+        }
+      }
+    },
+    {
+      "name": "5. Health - liveness",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/q/health/live",
+          "host": ["{{base_url}}"],
+          "path": ["q", "health", "live"]
+        }
+      }
+    },
+    {
+      "name": "6. Health - readiness",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/q/health/ready",
+          "host": ["{{base_url}}"],
+          "path": ["q", "health", "ready"]
+        }
+      }
+    },
+    {
+      "name": "7. OpenAPI (Swagger)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/rest/openapi",
+          "host": ["{{base_url}}"],
+          "path": ["rest", "openapi"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "access_token", "value": "" }
+  ]
+}

@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: spin
+commonLabels:
+  app.kubernetes.io/part-of: spin
+resources:
+  - configmap.yaml
+  - secret-example.yaml   # sustituir por Conjur Secrets Provider en prod
+  - deployment.yaml
+  - service.yaml
+  - route.yaml

@@ -1,0 +1,61 @@
+# PostgreSQL OpenShift-friendly (sclorg, corre con UID aleatorio).
+# Datos efímeros (emptyDir) para evitar consumo de PVC en el sandbox.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: quay.io/sclorg/postgresql-15-c9s:latest
+          env:
+            - name: POSTGRESQL_USER
+              value: comvar
+            - name: POSTGRESQL_PASSWORD
+              value: comvar
+            - name: POSTGRESQL_DATABASE
+              value: comvar
+          ports:
+            - containerPort: 5432
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+          readinessProbe:
+            exec:
+              command: ["/usr/libexec/check-container"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/pgsql/data
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432

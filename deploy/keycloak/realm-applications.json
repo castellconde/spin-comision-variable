@@ -1,0 +1,57 @@
+{
+  "realm": "applications",
+  "enabled": true,
+  "displayName": "Aplicaciones OXXO",
+  "sslRequired": "none",
+  "accessTokenLifespan": 300,
+  "clients": [
+    {
+      "clientId": "comision-variable-api",
+      "name": "Comision Variable API (resource server)",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "comision-variable-secret",
+      "bearerOnly": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [],
+      "webOrigins": []
+    },
+    {
+      "clientId": "pos-client",
+      "name": "Punto de Venta (consumidor)",
+      "description": "Cliente que obtiene token para consumir el API de comision variable",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "pos-secret",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": ["roles", "profile", "email"]
+    }
+  ],
+  "users": [
+    {
+      "username": "pos-test",
+      "enabled": true,
+      "email": "pos-test@oxxo.com",
+      "emailVerified": true,
+      "firstName": "POS",
+      "lastName": "Test",
+      "credentials": [
+        { "type": "password", "value": "pos-test", "temporary": false }
+      ],
+      "realmRoles": ["pos-consumer"]
+    }
+  ],
+  "roles": {
+    "realm": [
+      { "name": "pos-consumer", "description": "Rol para consumidores de punto de venta" }
+    ]
+  }
+}

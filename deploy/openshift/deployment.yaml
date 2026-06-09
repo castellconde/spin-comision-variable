@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comision-variable
+  labels:
+    app: comision-variable
+    app.kubernetes.io/name: comision-variable
+    app.kubernetes.io/part-of: spin
+    # Etiquetas Unified Service Tagging de Datadog
+    tags.datadoghq.com/service: "comision-variable"
+    tags.datadoghq.com/version: "1.0.0"
+    tags.datadoghq.com/env: "prod"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: comision-variable
+  template:
+    metadata:
+      labels:
+        app: comision-variable
+        tags.datadoghq.com/service: "comision-variable"
+        tags.datadoghq.com/version: "1.0.0"
+        tags.datadoghq.com/env: "prod"
+        # Habilita la recoleccion de logs por el agente Datadog
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        ad.datadoghq.com/comision-variable.logs: '[{"source":"java","service":"comision-variable"}]'
+    spec:
+      containers:
+        - name: comision-variable
+          image: image-registry.openshift-image-registry.svc:5000/spin/comision-variable:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: comision-variable-config
+            - secretRef:
+                name: comision-variable-secrets
+          env:
+            # Host del agente Datadog (DaemonSet) via downward API
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          startupProbe:
+            httpGet:
+              path: /q/health/started
+              port: http
+            failureThreshold: 20
+            periodSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /q/health/live
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]

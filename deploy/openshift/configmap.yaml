@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: comision-variable-config
+  labels:
+    app: comision-variable
+data:
+  HTTP_PORT: "8080"
+  QUARKUS_PROFILE: "prod"
+  # Base de datos (host/puerto/nombre no sensibles)
+  DB_HOST: "rds-comvar.internal"
+  DB_PORT: "5432"
+  DB_NAME: "comvar"
+  # Keycloak
+  KEYCLOAK_URL: "https://keycloak.apps.example.com"
+  KEYCLOAK_REALM: "applications"
+  KEYCLOAK_CLIENT_ID: "comision-variable-api"
+  # Spin
+  SPIN_API_URL: "https://api.spin.example.com"
+  SPIN_AUTH_URL: "https://auth.spin.example.com"
+  # Fault tolerance (ajustables sin redeploy de imagen)
+  SPIN_RETRY_MAX: "3"
+  SPIN_RETRY_DELAY_MS: "300"
+  SPIN_CB_VOLUME: "8"
+  SPIN_CB_FAILURE_RATIO: "0.5"
+  SPIN_CB_DELAY_MS: "5000"
+  SPIN_TIMEOUT_MS: "6000"
+  SPIN_RATELIMIT_ENABLED: "true"
+  SPIN_RATELIMIT_VALUE: "50"
+  SPIN_RATELIMIT_WINDOW_MS: "1000"
+  # Redis (opcional)
+  REDIS_ENABLED: "true"
+  REDIS_URL: "redis://redis-comvar:6379"
+  # Datadog / OpenTelemetry
+  DD_ENV: "prod"
+  OTEL_ENABLED: "true"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://$(DD_AGENT_HOST):4317"

@@ -1,0 +1,15 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/comisiones",
+    "bodyPatterns": [
+      { "matchesJsonPath": "$[?(@.transaccion == 'FORCE-ERROR')]" }
+    ]
+  },
+  "response": {
+    "status": 500,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": { "error": "SPIN_INTERNAL", "message": "Falla simulada para probar reintentos / circuit breaker" }
+  }
+}

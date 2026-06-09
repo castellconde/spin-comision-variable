@@ -1,0 +1,47 @@
+# =====================================================================
+#  Config del piloto en OpenShift Developer Sandbox (entorno efímero).
+#  Valores DEMO: el sandbox es desechable, no se usan secretos reales.
+#  En producción estos secretos los inyecta Conjur (ver deploy/openshift).
+# =====================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: comision-variable-config
+  labels:
+    app: comision-variable
+data:
+  HTTP_PORT: "8080"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_NAME: "comvar"
+  DB_POOL_MAX_SIZE: "8"
+  DB_POOL_MIN_SIZE: "1"
+  KEYCLOAK_URL: "http://keycloak:8080"
+  KEYCLOAK_REALM: "applications"
+  KEYCLOAK_CLIENT_ID: "comision-variable-api"
+  SPIN_API_URL: "http://spin-mock:8080"
+  SPIN_AUTH_URL: "http://spin-mock:8080"
+  SPIN_RETRY_MAX: "3"
+  SPIN_CB_FAILURE_RATIO: "0.5"
+  SPIN_CB_DELAY_MS: "5000"
+  SPIN_TIMEOUT_MS: "6000"
+  SPIN_RATELIMIT_VALUE: "50"
+  SPIN_RATELIMIT_WINDOW_MS: "1000"
+  REDIS_ENABLED: "false"
+  OTEL_ENABLED: "false"
+  DD_ENV: "sandbox"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: comision-variable-secrets
+  labels:
+    app: comision-variable
+type: Opaque
+stringData:
+  DB_USERNAME: "comvar"
+  DB_PASSWORD: "comvar"
+  KEYCLOAK_CLIENT_SECRET: "comision-variable-secret"
+  SPIN_CLIENT_ID: "demo-client"
+  SPIN_CLIENT_SECRET: "demo-secret"
+  SPIN_API_KEY: "demo-api-key"

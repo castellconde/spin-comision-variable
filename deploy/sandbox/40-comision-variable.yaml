@@ -1,0 +1,92 @@
+# Microservicio comision-variable. La imagen la construye 'oc new-build' desde
+# GitHub y queda en el ImageStream 'comision-variable:latest'. El trigger de
+# OpenShift inyecta la ruta real del registry interno (sin hardcodear namespace).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comision-variable
+  labels:
+    app: comision-variable
+  annotations:
+    image.openshift.io/triggers: |
+      [{"from":{"kind":"ImageStreamTag","name":"comision-variable:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"comision-variable\")].image"}]
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comision-variable
+  template:
+    metadata:
+      labels:
+        app: comision-variable
+        tags.datadoghq.com/service: "comision-variable"
+        tags.datadoghq.com/version: "1.0.0"
+        tags.datadoghq.com/env: "sandbox"
+    spec:
+      containers:
+        - name: comision-variable
+          image: comision-variable:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: comision-variable-config
+            - secretRef:
+                name: comision-variable-secrets
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+          startupProbe:
+            httpGet:
+              path: /q/health/started
+              port: http
+            failureThreshold: 30
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /q/health/live
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comision-variable
+  labels:
+    app: comision-variable
+spec:
+  selector:
+    app: comision-variable
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: comision-variable
+  labels:
+    app: comision-variable
+spec:
+  to:
+    kind: Service
+    name: comision-variable
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
