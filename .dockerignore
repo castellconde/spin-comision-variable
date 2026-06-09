@@ -1,5 +1,7 @@
-*
-!target/*-runner
-!target/*-runner.jar
-!target/lib/*
-!target/quarkus-app/*
+# El build multi-stage (Dockerfile) compila desde fuente: necesita pom.xml y src/.
+# Solo excluimos ruido. NO excluir pom.xml ni src/.
+.git/
+.idea/
+.vscode/
+*.iml
+*.log
