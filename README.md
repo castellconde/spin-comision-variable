@@ -130,20 +130,40 @@ Secrets Provider** (ver `deploy/openshift/conjur-notes.md`).
 
 ---
 
-## Estructura
+## Arquitectura (hexagonal — puertos y adaptadores)
+
+**Requisito del proyecto:** este y todos los microservicios siguen arquitectura
+hexagonal. El dominio es puro (sin frameworks); los adaptadores dependen del
+dominio mediante puertos, nunca al revés.
+
+```
+src/main/java/com/oxxo/spin/comisionvariable/
+├── domain/                         NÚCLEO — sin Quarkus/Jakarta/Jackson
+│   ├── model/                      Consulta, Comision, RegistroConsumo, ResultadoConsulta
+│   ├── port/in/                    ConsultarComisionUseCase        (puerto de entrada)
+│   ├── port/out/                   ComisionProviderPort, BitacoraPort (puertos de salida)
+│   └── exception/                  BusinessException, ComisionProviderException
+├── application/                    ComisionVariableService implements ConsultarComisionUseCase
+│                                   (orquesta puertos; solo depende del dominio)
+├── adapter/
+│   ├── in/rest/                    Resource + dto + mapper + exception   (driving)
+│   └── out/
+│       ├── spin/                   SpinComisionAdapter implements ComisionProviderPort
+│       │                           (resiliencia + OAuth2 + mapper + fallback) (driven)
+│       └── persistence/            BitacoraJpaAdapter implements BitacoraPort (driven)
+└── infrastructure/                 config (OpenAPI), logging (trazas Datadog), health
+```
+
+Flujo de dependencias: `REST → ConsultarComisionUseCase ← Service → ComisionProviderPort / BitacoraPort ← Adaptadores`.
+La tecnología de resiliencia (SmallRye FT) y de integración (Spin, JPA) queda
+confinada a los adaptadores; el núcleo se prueba con JUnit puro
+(`application/ComisionVariableServiceTest`).
+
+## Estructura del repositorio
 
 ```
 SPIN Comision Variable/
-├── comision-variable/         # microservicio Quarkus
-│   ├── src/main/java/com/oxxo/spin/comisionvariable/
-│   │   ├── api/               # resource, DTOs, exception mappers
-│   │   ├── domain/            # orquestación de la consulta
-│   │   ├── integration/spin/  # REST client + OAuth2 + fault tolerance
-│   │   ├── persistence/       # entidades, repos, bitácora, mantenimiento
-│   │   ├── cache/             # Redis opcional
-│   │   ├── config/            # @ConfigMapping, OpenAPI
-│   │   ├── logging/           # filtro de trazabilidad Datadog
-│   │   └── health/            # liveness / readiness
+├── comision-variable/         # microservicio Quarkus (ver árbol hexagonal arriba)
 │   ├── src/main/resources/    # application.properties + migraciones Flyway
 │   ├── src/main/docker/       # Dockerfile.native / Dockerfile.jvm
 │   └── .devcontainer/
