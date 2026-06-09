@@ -1,0 +1,187 @@
+# .claude/standards/diseno-tokens.yml
+#
+# Tokens de diseño machine-readable extraídos del Sistema de Diseño de Portales Web
+# (EstandaresDiseño-PortalesWebOXXO.pdf, sección 2 Paleta + sección 4 Tipografía).
+#
+# El code-reviewer del frontend lee este archivo para validar que los componentes
+# Angular usen los colores oficiales, tipografía oficial, y espaciados oficiales.
+#
+# La paleta activa del proyecto se define en .claude/project-config.yml → design.palette
+# (default: "oxxo" según decisión EDT Comercial 2026-05-19).
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Paleta OXXO (default para EDT Comercial)
+# ─────────────────────────────────────────────────────────────────────────────
+palettes:
+  oxxo:
+    description: "Paleta para portales con identidad OXXO directa al cliente final"
+    primary:
+      red_oxxo: "#DF0024"          # Call to action / botones primarios
+      yellow_oxxo: "#F6D300"       # Botones secundarios / acentos
+    semantic:
+      success: "#79C257"           # Green Win
+      error: "#ED1A35"             # Red Error
+      warning: "#F36E52"           # Orange Alert
+      info: "#29A5FF"              # Blue Data
+      favorite: "#FFC629"          # Yellow Favorite
+      confirmation: "#62625C"      # Gray Question
+    neutrals:
+      black_message: "#222222"     # Texto principal
+      black_portal: "#111111"      # Headers, énfasis
+      gray_dark: "#2B2B2B"         # Hover states
+      gray_medium: "#454545"       # UI elements
+      gray: "#858585"              # Bordes activos
+      gray_question: "#62625C"     # Texto secundario
+      gray_silver: "#C2C2C2"       # Bordes
+      gray_proximidad: "#98999D"   # UI elements
+      gray_light: "#F0F0F0"        # Fondos sutiles
+      white_portal: "#FFFFFF"      # Fondo principal
+      white_message: "#FFFFFF"     # Texto sobre fondos oscuros
+      black: "#000000"             # Solo para sombras
+
+  femsa:
+    description: "Paleta para portales internos / back-office con identidad FEMSA Comercio"
+    primary:
+      cherry_femsa: "#98002E"      # Call to action / botones primarios
+      cherry_light: "#CC003D"      # UI secundarios
+    semantic:
+      success: "#79C257"
+      error: "#ED1A35"
+      warning: "#F36E52"
+      info: "#29A5FF"
+      favorite: "#FFC629"
+      confirmation: "#62625C"
+    secondary:
+      orange: "#E1251B"
+      turquesa: "#14BBAF"
+    neutrals:
+      # mismos que OXXO — los neutrales son compartidos entre paletas
+      black_message: "#222222"
+      black_portal: "#111111"
+      gray_dark: "#2B2B2B"
+      gray_medium: "#454545"
+      gray: "#858585"
+      gray_question: "#62625C"
+      gray_silver: "#C2C2C2"
+      gray_proximidad: "#98999D"
+      gray_light: "#F0F0F0"
+      white_portal: "#FFFFFF"
+      white_message: "#FFFFFF"
+      black: "#000000"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Tipografía
+# ─────────────────────────────────────────────────────────────────────────────
+# Fuente única: Open Sans (Google Fonts). Importar en index.html o vía npm.
+# Pesos disponibles: Regular (400), Semibold (600), Bold (700).
+#
+typography:
+  font_family: "Open Sans"
+  font_fallback: "system-ui, -apple-system, sans-serif"
+  weights:
+    regular: 400
+    semibold: 600
+    bold: 700
+  scale:
+    # cada nivel: nombre conceptual → tamaño en pt + tamaño en px + peso default
+    display:        { size_pt: 26, size_px: 35, weight: bold,     usage: "Texto bienvenida, hero sections" }
+    title_1:        { size_pt: 24, size_px: 33, weight: bold,     usage: "Título 1, listado nombre portal" }
+    title_2:        { size_pt: 20, size_px: 27, weight: bold,     usage: "Título 2, sección actual" }
+    title_3:        { size_pt: 18, size_px: 25, weight: bold,     usage: "Título 3, subtítulo" }
+    subtitle:       { size_pt: 18, size_px: 25, weight: regular,  usage: "Subtítulo principal" }
+    subtitle_2:     { size_pt: 16, size_px: 22, weight: bold,     usage: "Subtítulo 2, nombre sección" }
+    subtitle_3:     { size_pt: 14, size_px: 19, weight: bold,     usage: "Subtítulo 3, etiqueta input" }
+    body_1:         { size_pt: 16, size_px: 22, weight: regular,  usage: "Cuerpo Texto 1, texto capturado input, menú principal" }
+    body_2:         { size_pt: 14, size_px: 19, weight: regular,  usage: "Cuerpo Texto 2, menú secundario, texto contenido en lista" }
+    body_3:         { size_pt: 12, size_px: 16, weight: regular,  usage: "Cuerpo Texto 3, texto indicador en lista" }
+    button:         { size_pt: 16, size_px: 22, weight: bold,     usage: "Texto de botones" }
+    label:          { size_pt: 14, size_px: 19, weight: semibold, usage: "Etiqueta de campos, indicadores" }
+    modal:          { size_pt: 20, size_px: 27, weight: regular,  usage: "Texto en modales / ventanas de aviso" }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Grid y layout
+# ─────────────────────────────────────────────────────────────────────────────
+# Sistema de grid responsivo basado en 1366px de ancho base.
+# 12 columnas + 11 medianiles + 2 márgenes laterales.
+#
+grid:
+  base_width_px: 1366
+  columns: 12
+  column_width_px: 84
+  gutter_px: 24                     # medianil entre columnas
+  margin_lateral_px: 48             # margen izquierdo/derecho
+  # Estructura vertical estándar de portal:
+  layout:
+    header_px: 84
+    nav_bar_px: 60
+    advice_note_px: 40
+    footer_px: 56
+    # contenido = el resto del viewport
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Iconografía
+# ─────────────────────────────────────────────────────────────────────────────
+# Librerías oficiales aprobadas. NO usar otras sin aprobación del EDT.
+#
+iconography:
+  primary:
+    name: "Boxicons"
+    url: "https://boxicons.com"
+    style: "regular"
+    usage: "Iconos generales del portal"
+  secondary_stroke:
+    name: "Flaticon (stroke)"
+    url: "https://www.flaticon.com/"
+    usage: "Iconos de estilo stroke cuando Boxicons no tenga el ícono necesario"
+  secondary_fill:
+    name: "Flaticon (fill)"
+    url: "https://www.flaticon.com/"
+    usage: "Iconos de estilo fill"
+  sizes_px:
+    small: 8
+    medium: 24
+    large: 32
+  base_size_pt: 8
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Espaciado y bordes (usados en componentes)
+# ─────────────────────────────────────────────────────────────────────────────
+spacing:
+  xs_px: 4
+  sm_px: 8
+  md_px: 12
+  lg_px: 16
+  xl_px: 24
+  xxl_px: 48
+
+borders:
+  radius_default_px: 6
+  width_thin_px: 1
+  width_medium_px: 2
+  width_thick_px: 4
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Sombras (drop shadows estándar)
+# ─────────────────────────────────────────────────────────────────────────────
+shadows:
+  card:
+    color: "#000000"
+    blur_px: 7
+    opacity: 0.25
+    # CSS equivalente: box-shadow: 0 2px 7px rgba(0,0,0,0.25);
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Referencias
+# ─────────────────────────────────────────────────────────────────────────────
+source:
+  document: "EstandaresDiseño-PortalesWebOXXO.pdf"
+  version: "1.0"
+  date: "Enero 2024"
+  authors: "Patricia Delgadillo, Enrique Cedillo"
+  team: "UI/UX XPOS Team"
+  sections_referenced:
+    - "§1 Estructura, grid y márgenes"
+    - "§2 Paleta de colores"
+    - "§3 Iconografía"
+    - "§4 Tipografía"
+    - "§5 Componentes"

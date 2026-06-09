@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment_overview": "Permisos y hooks de Claude Code para portales EDT Comercial. Implementa las reglas de CLAUDE.md §9 a nivel enforce.",
+
+  "permissions": {
+    "allow": [
+      "Bash(mvn:*)",
+      "Bash(npm:*)",
+      "Bash(ng:*)",
+      "Bash(node:*)",
+      "Bash(python:*)",
+      "Bash(pip:*)",
+      "Bash(npx:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git stash:*)",
+      "Bash(ls:*)",
+      "Bash(tree:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker ps)",
+      "Bash(docker logs:*)",
+      "Read(./**)",
+      "WebSearch",
+      "WebFetch(domain:docs.spring.io)",
+      "WebFetch(domain:angular.dev)",
+      "WebFetch(domain:angular.io)",
+      "WebFetch(domain:playwright.dev)",
+      "WebFetch(domain:docs.oracle.com)",
+      "WebFetch(domain:postgresql.org)",
+      "WebFetch(domain:auth0.com)",
+      "WebFetch(domain:owasp.org)"
+    ],
+
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git merge:*)",
+      "Bash(git rebase:*)",
+      "Bash(git reset:*)",
+      "Bash(mvn deploy:*)",
+      "Bash(npm publish:*)",
+      "Bash(docker push:*)",
+      "Bash(docker rmi:*)",
+      "Edit(./pom.xml)",
+      "Edit(./package.json)",
+      "Edit(./backend/pom.xml)",
+      "Edit(./frontend/package.json)",
+      "Edit(./mock-ac/pom.xml)",
+      "Edit(./qa/package.json)",
+      "Edit(./**/application.properties)",
+      "Edit(./**/application-*.properties)",
+      "Edit(./**/.env)",
+      "Edit(./.github/workflows/**)",
+      "Edit(./**/Dockerfile)",
+      "Edit(./docker-compose.yml)",
+      "Edit(./**/k8s/**)",
+      "Edit(./**/environment*.ts)",
+      "Edit(./CLAUDE.md)",
+      "Edit(./.claude/agents/**)",
+      "Edit(./.claude/settings.json)",
+      "Edit(./.claude/standards/**)"
+    ],
+
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~)",
+      "Bash(rm -rf $HOME)",
+      "Bash(sudo:*)",
+      "Bash(chmod 777:*)",
+      "Bash(curl:*production*)",
+      "Bash(curl:*prod*)",
+      "Edit(./.git/**)"
+    ]
+  },
+
+  "hooks": {
+    "_comment_hooks": "Hooks que se disparan ante eventos. Los marcados con TODO requieren scripts adicionales que el LT debe implementar según el flujo de su proyecto.",
+
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ \"$CLAUDE_TOOL_INPUT\" = *\"git commit\"* ] && [ -f .claude/mode ] && [ \"$(cat .claude/mode | tr -d '[:space:]')\" = \"demo\" ]; then echo 'WARNING: Vas a hacer commit con .claude/mode = demo. Si es a develop/staging/main, primero cambia a production.'; fi"
+          }
+        ]
+      }
+    ],
+
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT_FILE_PATH\" | grep -qE '\\.(properties|ts|java|xml)$'; then if grep -nE 'password\\s*=\\s*[A-Za-z0-9]{8,}|secret\\s*=\\s*[A-Za-z0-9]{16,}|token\\s*=\\s*[A-Za-z0-9_-]{32,}' \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null | grep -v '\\${' > /tmp/secret-check-$$; then echo '⚠ POSIBLE SECRETO HARDCODED detectado en archivo editado. Revisa antes de commit:'; cat /tmp/secret-check-$$; rm -f /tmp/secret-check-$$; fi; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

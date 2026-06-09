@@ -1,0 +1,86 @@
+# project-config.yml
+#
+# Configuración específica del proyecto. Editar a mano o auto-generar
+# vía INSTRUCCIONES_NUEVO_PROYECTO.md + Claude.
+#
+# Los agentes (.claude/agents/) leen este archivo para entender:
+#   - Qué stack tienes (Oracle vs Postgres, WebLogic vs Tomcat, etc.)
+#   - Quién es el equipo (LT, desarrolladores)
+#   - Cómo configurar el Access Control
+#   - Qué paleta visual aplica (OXXO o FEMSA)
+
+# ─── Identificación del proyecto ────────────────────────────────────
+project:
+  name: Spin Comision Variable                # ej. "Portal Reingeniería de Pedidos"
+  short_name: spin-cv             # kebab-case, para paths y URLs. ej. "pedidos"
+  short_name_upper: SPIN-CV # MAYÚSCULAS sin guiones, para variables KeyVault. ej. "PEDIDOS"
+  artifact_id: spin_cv            # Maven artifactId — típicamente igual a short_name
+  api_base_path: /rest/v1/spin-cv
+
+# ─── Equipo ──────────────────────────────────────────────────────────
+team:
+  lt: Roberto Castillo <roberto.castillo@oxxo.com>                        
+  developers:                          # lista de desarrolladores
+    - castellconde
+  qa: [PENDIENTE]                      # QA / testing
+
+# ─── Stack técnico ───────────────────────────────────────────────────
+stack:
+  java:
+    version: 21            # 17 | 21 | 11
+    quarkus_version: 3.33.1 # Solo si java_version >= 21 y app_server = spring-boot-embedded
+
+  app_server: Openshift             # weblogic | jboss | tomcat | spring-boot-embedded
+  
+  database:
+    type: postgresql                   # oracle | postgresql | h2 (h2 solo demo)
+    schema: sespin_cv  # Postgresql schema name
+    jdbc_driver: postgresql               # ojdbc11 (Oracle 19c+) | postgresql
+
+  #frontend:
+  #  framework: <FRONTEND_FRAMEWORK>    # angular | react
+  #  version: 19                        # Angular major version
+  #  local_port: <FRONTEND_PORT>        # típico 4200
+
+# ─── Modo del proyecto ───────────────────────────────────────────────
+# Sincroniza con .claude/mode (archivo separado)
+# - demo:       Spring Boot embedded + H2 + Mock-AC. Para piloto local.
+# - production: App server real + BD real + AC real. Para staging/prod.
+current_mode: demo
+
+# ─── Access Control ──────────────────────────────────────────────────
+access_control:
+  keycloak_realm: apps_realm              # ej. "oxxo-realm"
+  #app_id: <AC_APP_ID>                  # ej. "PORTAL_PEDIDOS"
+  #app_id_variable: <SHORT_NAME_UPPER>_APPID  # nombre de la variable en Key Vault
+  #url_production: <AC_URL_PROD>        # ej. "https://access-control.femsa.com"
+  #url_demo: http://mock-ac:9000        # mock-AC en docker-compose
+
+# ─── Identidad visual ────────────────────────────────────────────────
+design:
+  palette: femsa                   # oxxo | femsa | other
+  # Ver .claude/standards/diseno-tokens.yml para valores hex exactos
+
+# ─── CI/CD ───────────────────────────────────────────────────────────
+ci_cd:
+  pipeline: azure-devops               # gestionado por CMS
+  registry: oxzacrmdpd01.azurecr.io
+  # Los workflows .github/ los gobierna CMS — NO editarlos desde Claude
+
+# ─── Documentación ───────────────────────────────────────────────────
+documentation:
+  default_author: <LT_NAME>
+  # Versiones vigentes de cada entregable (las actualiza el doc-writer)
+  current_versions:
+    esp_tecnica: "0.1"          # aún no generada
+    runbook: "0.1"
+    matriz_pruebas_unitarias: "0.1"
+    ara: "0.1"
+    mda: "0.1"
+    principios_seguridad: "0.1"
+
+# ─── Metadata del template ───────────────────────────────────────────
+template:
+  version: 2.x
+  generated_from: edt-portal-template
+  generated_at: 2026-06-08            # llenar al generar
