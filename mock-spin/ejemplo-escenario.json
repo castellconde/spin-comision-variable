@@ -1,0 +1,22 @@
+{
+  "priority": 2,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/comisiones",
+    "bodyPatterns": [
+      { "matchesJsonPath": { "expression": "$.servicio", "matches": "SERV-NUEVO.*" } }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "referencia": "{{jsonPath request.body '$.referencia'}}",
+      "concepto": "{{jsonPath request.body '$.servicio'}}",
+      "porcentajeComision": 4.00,
+      "montoComision": 20.00,
+      "moneda": "MXN",
+      "estatus": "CALCULADA"
+    }
+  }
+}

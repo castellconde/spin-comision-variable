@@ -4,12 +4,12 @@
     "method": "POST",
     "urlPath": "/v1/comisiones",
     "bodyPatterns": [
-      { "matchesJsonPath": "$[?(@.transaccion == 'FORCE-ERROR')]" }
+      { "matchesJsonPath": { "expression": "$.transaccion", "matches": ".*(ERR-500|FORCE-ERROR).*" } }
     ]
   },
   "response": {
     "status": 500,
     "headers": { "Content-Type": "application/json" },
-    "jsonBody": { "error": "SPIN_INTERNAL", "message": "Falla simulada para probar reintentos / circuit breaker" }
+    "jsonBody": { "error": "SPIN_INTERNAL", "message": "Falla interna simulada (reintentos / circuit breaker)" }
   }
 }

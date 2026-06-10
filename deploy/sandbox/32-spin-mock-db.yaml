@@ -1,0 +1,82 @@
+# =====================================================================
+#  Mock Spin DIRIGIDO POR BD (reemplaza al WireMock 30-spin-mock.yaml).
+#  Mantiene el Service 'spin-mock' (puerto 8080) para que el microservicio
+#  principal (SPIN_API_URL=http://spin-mock:8080) no cambie.
+#  La imagen la construye 'oc new-build' (ImageStream spin-mock-service:latest).
+# =====================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spin-mock
+  labels:
+    app: spin-mock
+  annotations:
+    image.openshift.io/triggers: |
+      [{"from":{"kind":"ImageStreamTag","name":"spin-mock-service:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"spin-mock\")].image"}]
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spin-mock
+  template:
+    metadata:
+      labels:
+        app: spin-mock
+    spec:
+      containers:
+        - name: spin-mock
+          image: spin-mock-service:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: DB_HOST
+              value: postgres
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: comvar
+            - name: DB_USERNAME
+              value: comvar
+            - name: DB_PASSWORD
+              value: comvar
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          startupProbe:
+            httpGet:
+              path: /q/health/started
+              port: http
+            failureThreshold: 30
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /q/health/live
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spin-mock
+  labels:
+    app: spin-mock
+spec:
+  selector:
+    app: spin-mock
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

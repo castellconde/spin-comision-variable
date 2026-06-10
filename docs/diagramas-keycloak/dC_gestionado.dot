@@ -1,0 +1,28 @@
+digraph opcionC {
+  rankdir=LR; fontname="Helvetica"; bgcolor="white";
+  node [fontname="Helvetica", fontsize=11, shape=box, style="rounded,filled", fillcolor="#EEF3F8", color="#3B6EA5"];
+  edge [fontname="Helvetica", fontsize=9, color="#555555"];
+
+  xpos [label="XPOS", fillcolor="#FFEFC2", color="#C9A227"];
+  f5 [label="F5 BIG-IP VIP", fillcolor="#E2E2E2", color="#888888"];
+
+  subgraph cluster_aws {
+    label="AWS (servicios gestionados)"; style="rounded,filled"; fillcolor="#FFF4E5"; color="#E8862E"; fontsize=12;
+    cognito [label="Amazon Cognito\nUser Pool + app clients M2M\n(client_credentials)\n*NO es Keycloak*", fillcolor="#FFE0B2", color="#E8862E"];
+    rds [label="RDS PostgreSQL\ndb: comvar", shape=cylinder, fillcolor="#E6F4EA", color="#2E7D32"];
+  }
+
+  subgraph cluster_rosa {
+    label="OpenShift ROSA (AWS)"; style="rounded,filled"; fillcolor="#E8F0FE"; color="#3B6EA5"; fontsize=12;
+    rt_api [label="Route api"];
+    ms [label="comision-variable\nQuarkus nativo\n(quarkus-oidc apunta\nal issuer Cognito)", fillcolor="#D6E4F7"];
+  }
+
+  spin [label="API SPIN", fillcolor="#F3E8FD", color="#6A1B9A"];
+
+  xpos -> cognito [label="1. token endpoint Cognito\n(directo o vía F5)", style=dashed, color="#E8862E"];
+  xpos -> f5 [label="2. Bearer JWT"];
+  f5 -> rt_api; rt_api -> ms;
+  ms -> cognito [label="JWKS Cognito\n(cacheado)", style=dashed, color="#E8862E"];
+  ms -> rds; ms -> spin;
+}

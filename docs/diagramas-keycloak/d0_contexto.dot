@@ -1,0 +1,36 @@
+digraph contexto {
+  rankdir=LR; fontname="Helvetica"; bgcolor="white";
+  node [fontname="Helvetica", fontsize=11, shape=box, style="rounded,filled", fillcolor="#EEF3F8", color="#3B6EA5"];
+  edge [fontname="Helvetica", fontsize=9, color="#555555"];
+  graph [fontsize=12, labelloc=t];
+
+  subgraph cluster_tienda {
+    label="Tienda OXXO"; style="rounded,filled"; fillcolor="#FFF7E6"; color="#C9A227";
+    xpos [label="XPOS\n(punto de venta)", fillcolor="#FFEFC2"];
+  }
+
+  subgraph cluster_dmz {
+    label="DMZ / Red corporativa"; style="rounded,filled"; fillcolor="#F2F2F2"; color="#888888";
+    f5 [label="F5 BIG-IP\nVirtual IP (VIP)\nTLS + balanceo", fillcolor="#E2E2E2"];
+  }
+
+  subgraph cluster_rosa {
+    label="OpenShift ROSA (AWS)"; style="rounded,filled"; fillcolor="#E8F0FE"; color="#3B6EA5";
+    route [label="Route\n(reencrypt TLS)"];
+    ms [label="Microservicio\ncomision-variable\nQuarkus 3.33 / Java 21\n(nativo, ubi10-minimal)", fillcolor="#D6E4F7"];
+  }
+
+  kc [label="Keycloak 26.x\nrealm 'applications'\n(UBICACIÓN: opción A / B / C)", shape=box3d, fillcolor="#FDE9E9", color="#B23A3A"];
+  rds [label="AWS RDS\nPostgreSQL\n(bitácora particionada\n+ configuración)", shape=cylinder, fillcolor="#E6F4EA", color="#2E7D32"];
+  spin [label="API externa SPIN\n(OAuth2 apikey + token)", fillcolor="#F3E8FD", color="#6A1B9A"];
+
+  xpos -> kc  [label="1. client_credentials\n(token request, cacheado)", style=dashed, color="#B23A3A"];
+  xpos -> f5  [label="2. POST /comision\nBearer JWT"];
+  f5 -> route [label="3. forward VIP→Route"];
+  route -> ms [label="4."];
+  ms -> kc    [label="5. JWKS / issuer\n(cacheado, no por request)", style=dashed, color="#B23A3A"];
+  ms -> rds   [label="6. persiste evento"];
+  ms -> spin  [label="7. consulta comisión\n(Retry/CircuitBreaker/Timeout)"];
+  ms -> rds   [label="8. actualiza respuesta"];
+  ms -> xpos  [label="9. respuesta", style=dotted, constraint=false];
+}

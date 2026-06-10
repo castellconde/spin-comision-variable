@@ -1,0 +1,37 @@
+digraph opcionA {
+  rankdir=LR; fontname="Helvetica"; bgcolor="white";
+  node [fontname="Helvetica", fontsize=11, shape=box, style="rounded,filled", fillcolor="#EEF3F8", color="#3B6EA5"];
+  edge [fontname="Helvetica", fontsize=9, color="#555555"];
+
+  xpos [label="XPOS", fillcolor="#FFEFC2", color="#C9A227"];
+  f5 [label="F5 BIG-IP VIP\n(api.* y auth.*)", fillcolor="#E2E2E2", color="#888888"];
+
+  subgraph cluster_rosa {
+    label="OpenShift ROSA (AWS) — mismo cluster"; style="rounded,filled"; fillcolor="#E8F0FE"; color="#3B6EA5"; fontsize=12;
+    subgraph cluster_iam {
+      label="namespace: iam"; style="rounded,filled"; fillcolor="#FDE9E9"; color="#B23A3A";
+      kcop [label="RHBK Operator\n(Red Hat build of\nKeycloak 26.6)", fillcolor="#FAD4D4"];
+      kc1 [label="Keycloak pod 1", fillcolor="#FAD4D4"];
+      kc2 [label="Keycloak pod 2\n(HA Infinispan)", fillcolor="#FAD4D4"];
+    }
+    subgraph cluster_spin {
+      label="namespace: spin-comision-variable"; style="rounded,filled"; fillcolor="#D6E4F7"; color="#3B6EA5";
+      ms [label="comision-variable\nQuarkus nativo"];
+    }
+    rt_api [label="Route api"];
+    rt_auth [label="Route auth"];
+  }
+
+  rds [label="RDS PostgreSQL\ndb: comvar | db: keycloak\n(instancia compartida,\nbases separadas)", shape=cylinder, fillcolor="#E6F4EA", color="#2E7D32"];
+  spin [label="API SPIN", fillcolor="#F3E8FD", color="#6A1B9A"];
+
+  xpos -> f5 [label="token + API\n(misma VIP, 2 pools)"];
+  f5 -> rt_auth [label="/realms/applications/*", color="#B23A3A"];
+  f5 -> rt_api [label="/rest/v1/*"];
+  rt_auth -> kc1; rt_auth -> kc2;
+  rt_api -> ms;
+  kcop -> kc1 [style=dotted, label="reconcile"]; kcop -> kc2 [style=dotted];
+  ms -> kc1 [label="JWKS interno\n(Service, sin salir\ndel cluster)", style=dashed, color="#B23A3A"];
+  kc1 -> rds; kc2 -> rds; ms -> rds;
+  ms -> spin;
+}

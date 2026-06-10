@@ -1,0 +1,34 @@
+digraph opcionB {
+  rankdir=LR; fontname="Helvetica"; bgcolor="white";
+  node [fontname="Helvetica", fontsize=11, shape=box, style="rounded,filled", fillcolor="#EEF3F8", color="#3B6EA5"];
+  edge [fontname="Helvetica", fontsize=9, color="#555555"];
+
+  xpos [label="XPOS", fillcolor="#FFEFC2", color="#C9A227"];
+  f5 [label="F5 BIG-IP VIP\n(api.* y auth.*)", fillcolor="#E2E2E2", color="#888888"];
+
+  subgraph cluster_iam {
+    label="Plataforma IAM dedicada (cluster/VMs aparte)"; style="rounded,filled"; fillcolor="#FDE9E9"; color="#B23A3A"; fontsize=12;
+    kc1 [label="Keycloak 26.x nodo 1", fillcolor="#FAD4D4"];
+    kc2 [label="Keycloak 26.x nodo 2\n(HA Infinispan)", fillcolor="#FAD4D4"];
+    rds_kc [label="RDS PostgreSQL\ndb: keycloak\n(dedicada IAM)", shape=cylinder, fillcolor="#E6F4EA", color="#2E7D32"];
+  }
+
+  subgraph cluster_rosa {
+    label="OpenShift ROSA (AWS)"; style="rounded,filled"; fillcolor="#E8F0FE"; color="#3B6EA5"; fontsize=12;
+    rt_api [label="Route api"];
+    ms [label="comision-variable\nQuarkus nativo", fillcolor="#D6E4F7"];
+  }
+
+  otros [label="Otras aplicaciones\n(XPOS módulos, futuros\nmicroservicios)", style="rounded,dashed", fillcolor="white", color="#888888"];
+  rds [label="RDS PostgreSQL\ndb: comvar", shape=cylinder, fillcolor="#E6F4EA", color="#2E7D32"];
+  spin [label="API SPIN", fillcolor="#F3E8FD", color="#6A1B9A"];
+
+  xpos -> f5;
+  f5 -> kc1 [label="/realms/*", color="#B23A3A"]; f5 -> kc2 [color="#B23A3A"];
+  f5 -> rt_api [label="/rest/v1/*"];
+  rt_api -> ms;
+  kc1 -> rds_kc; kc2 -> rds_kc;
+  ms -> kc1 [label="JWKS vía F5/red interna\n(cacheado)", style=dashed, color="#B23A3A"];
+  ms -> rds; ms -> spin;
+  otros -> f5 [style=dashed, label="reutilización\ncorporativa"];
+}

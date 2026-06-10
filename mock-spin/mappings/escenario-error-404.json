@@ -1,0 +1,15 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/comisiones",
+    "bodyPatterns": [
+      { "matchesJsonPath": { "expression": "$.transaccion", "matches": ".*ERR-404.*" } }
+    ]
+  },
+  "response": {
+    "status": 404,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": { "error": "TARIFA_NO_ENCONTRADA", "message": "No existe tarifa para el concepto solicitado" }
+  }
+}

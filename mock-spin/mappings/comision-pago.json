@@ -1,21 +1,24 @@
 {
-  "priority": 10,
+  "priority": 2,
   "request": {
     "method": "POST",
     "urlPath": "/v1/comisiones",
     "headers": {
       "Authorization": { "matches": "Bearer .*" },
       "x-api-key": { "matches": ".+" }
-    }
+    },
+    "bodyPatterns": [
+      { "matchesJsonPath": { "expression": "$.servicio", "matches": "SERV-PAGO.*" } }
+    ]
   },
   "response": {
     "status": 200,
     "headers": { "Content-Type": "application/json" },
     "jsonBody": {
       "referencia": "{{jsonPath request.body '$.referencia'}}",
-      "concepto": "{{#if (jsonPath request.body '$.servicio')}}{{jsonPath request.body '$.servicio'}}{{else}}{{jsonPath request.body '$.producto'}}{{/if}}",
-      "porcentajeComision": 2.50,
-      "montoComision": 12.75,
+      "concepto": "{{jsonPath request.body '$.servicio'}}",
+      "porcentajeComision": 1.50,
+      "montoComision": 7.50,
       "moneda": "MXN",
       "estatus": "CALCULADA"
     },

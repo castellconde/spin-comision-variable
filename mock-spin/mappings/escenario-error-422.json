@@ -1,0 +1,15 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/comisiones",
+    "bodyPatterns": [
+      { "matchesJsonPath": { "expression": "$.transaccion", "matches": ".*ERR-422.*" } }
+    ]
+  },
+  "response": {
+    "status": 422,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": { "error": "DATOS_INVALIDOS", "message": "Datos de entrada invalidos para el calculo" }
+  }
+}

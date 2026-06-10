@@ -8,6 +8,7 @@
 | 0.1 | 08/06/2026 | Roberto Castillo | Runbook inicial del piloto Comisión Variable. |
 | 0.2 | 08/06/2026 | Roberto Castillo | Agregada sección 4.5: arranque paso a paso en OpenShift Developer Sandbox. |
 | 0.3 | 08/06/2026 | Roberto Castillo | Sección 4.5: agregado paso de clonación del repo en terminal (Web Terminal / local) y nota de estructura aplanada. |
+| 0.4 | 08/06/2026 | Roberto Castillo | Agregada sección 4.6: obtener token vía Route de Keycloak (sin script). |
 
 ## 1. Identificación del Producto
 
@@ -197,6 +198,52 @@ oc scale deploy/comision-variable postgres keycloak spin-mock --replicas=0
 | Build falla por memoria | Confirmar empaquetado JVM (no nativo) en el `Dockerfile`. |
 | App CrashLoopBackOff por OIDC | Esperar a que Keycloak esté Ready; `oc rollout restart deploy/comision-variable`. |
 | Pod Pending por cuota | Bajar réplicas o `requests` de memoria; el Sandbox limita ~7 GB. |
+
+### 4.6 Obtener token vía Route de Keycloak (sin script)
+
+Alternativa a `get-token.sh`: exponer Keycloak con una Route y pedir el token directo al endpoint OIDC estándar desde curl, Postman o el navegador (sin `port-forward` ni script).
+
+**Paso 1 — Exponer Keycloak con una Route (edge TLS).** Una sola vez:
+
+```bash
+oc create route edge keycloak --service=keycloak --port=8080
+KC=$(oc get route keycloak -o jsonpath='{.spec.host}')
+echo "https://$KC"
+```
+
+**Paso 2 — Pedir el token al endpoint OIDC.** Endpoint estándar del realm:
+
+```
+POST https://<keycloak-route>/realms/applications/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+grant_type=client_credentials & client_id=pos-client & client_secret=pos-secret
+```
+
+Con curl:
+
+```bash
+curl -s -X POST "https://$KC/realms/applications/protocol/openid-connect/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d grant_type=client_credentials -d client_id=pos-client -d client_secret=pos-secret
+```
+
+Devuelve un JSON con `access_token` (vigencia ~5 min, `accessTokenLifespan` del realm).
+
+**Paso 3 — Usar el token.** En Swagger UI (`/swagger-ui`) → *Authorize* → pega solo el `access_token`. O con curl al endpoint de negocio:
+
+```bash
+TOKEN="<access_token>"
+ROUTE=$(oc get route comision-variable -o jsonpath='{.spec.host}')
+curl -s -X POST "https://$ROUTE/rest/v1/comision-variable/comision" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"id":"POS-1","plaza":"PLZ-001","tienda":"TND-04521","caja":"CAJA-03","transaccion":"TRX-1","servicio":"SERV-TAE-ATT"}'
+```
+
+**Paso 4 — (Opcional) Postman.** En el *environment* de la colección, fija `keycloak_url = https://<keycloak-route>` y ejecuta el request "1. Obtener token"; el resto de la colección reusa el `access_token`.
+
+> Notas:
+> - Keycloak ya está configurado para vivir detrás de la Route (`KC_HOSTNAME_STRICT=false`, `KC_PROXY_HEADERS=xforwarded`). Si algún flujo marcara error de hostname: `oc set env deploy/keycloak KC_HOSTNAME=https://$KC` y reiniciar.
+> - **Seguridad:** exponer Keycloak con Route es adecuado para el piloto, pero deja el endpoint de token público; fuera del piloto, restringir su acceso.
 
 ## 5. Monitoreo y diagnóstico
 
